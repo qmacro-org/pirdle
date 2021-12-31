@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+const readline = require('readline')
+
+const encode = str => Buffer.from(str).toString('base64')
+const decode = str => Buffer.from(str, 'base64').toString('utf8')
+
+const test = word => {
+    const encoded = encode(word)
+    const encoded_short = encoded.replace(/=*$/, '')
+    const decoded = decode(encoded_short)
+    const result = word == decoded ? '✅' : '❌'
+    console.log(result, word, encoded, encoded_short, decoded)
+    //if (word != decoded) console.log(word, encoded, encoded_short, decoded)
+}
+
+readline
+    .createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        terminal: false
+    })
+    .on('line', line => {
+        test(line)
+    })

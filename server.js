@@ -1,10 +1,10 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const { encode, decode } = require('./encode-decode.js')
-const { randomiser } = require('./words.js')
+const { randomiser, check, colours } = require('./words.js')
 
 const app = express()
-const randomword = randomiser()
+const defaultwordlength = 5
 const port = 8000
 
 app.use(cookieParser())
@@ -13,12 +13,19 @@ app.get('/', (_, res) => {
     res.send("<a href='/new'>New</a>")
 })
 
-app.get('/new', (_, res) => {
+app.get('/new', (req, res) => {
     res.cookie('guesses', [])
-    res.redirect(`/${encode(randomword())}`)
+    const wordlength = req.query.wordlength || defaultwordlength
+    const word = randomiser(wordlength)().toUpperCase()
+    console.log(`New puzzle for '${word}'`)
+    res.redirect(`/${encode(word)}`)
 })
 
 app.get('/:puzzle', (req, res) => {
+
+    // This is the 'answer'
+    const word = decode(req.params.puzzle)
+    const wordlength = word.length
 
     // Get any previous guesses from the cookie
     let guesses = req.cookies.guesses || []
@@ -27,34 +34,30 @@ app.get('/:puzzle', (req, res) => {
     if (req.query.reset == 'on') guesses = []
 
     // What's the guess? (empty string if no guess)
-    const guess = req.query.guess || ''
+    const guess = (req.query.guess || '').toUpperCase()
 
     // Only increment the guesscount if there's an actual guess
     if (guess.length) {
 
-        // TODO handle the guess
-
         // Record the guess
-        guesses.push(guess)
+        const result = check(word, guess)
+        guesses.push({guess, result, display: colours(result)})
 
     }
-
-    console.log(guesses)
 
     // The response
     res.cookie('guesses', guesses)
     res.send(`
-<h1>Puzzle</h1>
-<p>Your guesses: ${guesses.join(",")}</p>
+<h1>Puzzle (${wordlength} letter word)</h1>
 <form method="GET">
-<input name="guess" placeholder="Enter your guess" autofocus />
-<input name="reset" type="checkbox" />
+<input name="guess" placeholder="Enter your guess" maxlength="${wordlength}" style="text-transform: uppercase" autofocus />
 <input type="submit" />
+<input name="reset" type="checkbox">Reset guess data</input>
 </form>
-<p>Cookies from request that produced this response:</p>
 <code>
-${JSON.stringify(req.cookies)}
-</code>
+<div style="white-space: pre-wrap;">
+${guesses.map(x => x.guess + ' ' + x.result + ' ' + x.display).join('\n') }
+</div>
     `)
 })
 

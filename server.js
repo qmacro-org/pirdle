@@ -46,7 +46,7 @@ app.get('/:puzzle', (req, res) => {
     }
 
     // The response
-    res.cookie('guesses', guesses)
+    res.cookie('guesses', guesses, { path: `/${req.params.puzzle}` })
     res.send(`
 <h1>Puzzle (${wordlength} letter word)</h1>
 <form method="GET">

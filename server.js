@@ -10,7 +10,7 @@ const port = 8000
 app.use(cookieParser())
 
 app.get('/', (_, res) => {
-    res.send("<a href='/new'>New</a>")
+    res.send("<a href='/new'>New puzzle</a>")
 })
 
 app.get('/new', (req, res) => {
@@ -62,5 +62,5 @@ ${guesses.map(x => x.guess + ' ' + x.result + ' ' + x.display).join('\n') }
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
+    console.log(`Puzzle server listening at http://localhost:${port}`)
 })

@@ -59,6 +59,8 @@ const check = (w, g) => {
 
 }
 
+const checksolved = result => result.every(x => x === green)
+
 const colours = results => {
     const colours = ['⬛', '🟨', '🟩']
     return results
@@ -66,4 +68,4 @@ const colours = results => {
         .join('')
 }
 
-module.exports = { randomiser, check, colours }
+module.exports = { randomiser, check, colours, checksolved }

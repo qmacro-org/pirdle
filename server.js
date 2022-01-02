@@ -1,7 +1,7 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const { encode, decode } = require('./encode-decode.js')
-const { randomiser, check, colours } = require('./words.js')
+const { randomiser, check, colours, checksolved } = require('./words.js')
 
 const app = express()
 const defaultwordlength = 5
@@ -41,24 +41,32 @@ app.get('/:puzzle', (req, res) => {
 
         // Record the guess
         const result = check(word, guess)
-        guesses.push({guess, result, display: colours(result)})
-
+        guesses.push({guess, result})
     }
 
-    // The response
     res.cookie('guesses', guesses, { path: `/${req.params.puzzle}` })
-    res.send(`
+
+    const solved = guesses.length && checksolved(guesses[guesses.length - 1].result)
+
+    // The response
+    if (req.accepts().includes('text/html')) {
+        res.send(`
 <h1>Puzzle (${wordlength} letter word)</h1>
 <form method="GET">
 <input name="guess" placeholder="Enter your guess" maxlength="${wordlength}" style="text-transform: uppercase" autofocus />
 <input type="submit" />
 <input name="reset" type="checkbox">Reset guess data</input>
 </form>
+<div>${solved ? "🎉 SOLVED! <a href='/new'>New puzzle</a>" : ""}</div>
 <code>
 <div style="white-space: pre-wrap;">
-${guesses.map(x => x.guess + ' ' + x.result + ' ' + x.display).join('\n') }
+${guesses.map(x => x.guess + ' ' + colours(x.result)).join('\n') }
 </div>
-    `)
+        `)
+    } else {
+        res.setHeader('Content-Type', 'application/json')
+        res.json({ solved, wordlength, guesses })
+    }
 })
 
 app.listen(port, () => {

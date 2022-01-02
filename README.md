@@ -17,8 +17,4 @@ Some general design principles guiding this experiment:
 - stateless server operation
 - word to guess is encoded in the URL (encoding, not encryption, is enough)
 - guess data maintained in cookies
-
-Next tasks:
-
-- [ ] make guess-data cookies specific to encoded-word URLs
-- [ ] create API version (JSON-based responses)
+- simple HTML and JSON outputs
